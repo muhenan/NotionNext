@@ -45,10 +45,14 @@ const MyApp = ({ Component, pageProps }) => {
   // 整体布局
   const GLayout = useCallback(
     props => {
+      // 检查是否是fixed路由，如果是则不应用主题布局
+      if (route.pathname.startsWith('/fixed/')) {
+        return <>{props.children}</>
+      }
       const Layout = getBaseLayoutByTheme(theme)
       return <Layout {...props} />
     },
-    [theme]
+    [theme, route.pathname]
   )
 
   const enableClerk = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
