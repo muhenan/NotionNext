@@ -146,9 +146,9 @@ export async function getStaticPaths() {
   const from = 'fixed-slug-paths'
   const { allPages } = await getGlobalData({ from })
 
-  // 生成所有已发布文章的路径
+  // 生成所有页面和文章的路径
   const paths = allPages
-    ?.filter(row => row.type === 'Post' && row.status === 'Published')
+    ?.filter(row => row.type === 'Page' || row.type === 'Post')
     .map(row => ({
       params: { slug: row.slug }
     }))
@@ -166,13 +166,9 @@ export async function getStaticProps({ params: { slug }, locale }) {
   console.log(`[Fixed] 查找文章: ${slug}`)
   console.log(`[Fixed] 总页面数: ${props?.allPages?.length || 0}`)
 
-  // 调试：列出所有文章的slug
-  const allSlugs = props?.allPages?.filter(p => p.type.indexOf('Menu') < 0).map(p => p.slug) || []
-  console.log(`[Fixed] 所有文章slug:`, allSlugs.slice(0, 10)) // 只显示前10个
-
   // 在列表内查找文章 - 仅直接匹配
   props.post = props?.allPages?.find(p => {
-    const match = p.type.indexOf('Menu') < 0 && p.slug === slug
+    const match = (p.type === 'Page' || p.type === 'Post') && p.slug === slug
     if (match) {
       console.log(`[Fixed] 找到匹配文章: ${p.slug}, type: ${p.type}`)
     }
