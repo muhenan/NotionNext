@@ -1,8 +1,7 @@
 import BLOG from '@/blog.config'
 import { siteConfig } from '@/lib/config'
-import { getGlobalData, getPost } from '@/lib/db/getSiteData'
+import { getGlobalData } from '@/lib/db/getSiteData'
 import { processPostData } from '@/lib/utils/post'
-import { idToUuid } from 'notion-utils'
 import { compressImage, mapImgUrl } from '@/lib/notion/mapImage'
 import { isBrowser, loadExternalResource } from '@/lib/utils'
 import mediumZoom from '@fisch0920/medium-zoom'
@@ -171,29 +170,15 @@ export async function getStaticProps({ params: { slug }, locale }) {
   const allSlugs = props?.allPages?.filter(p => p.type.indexOf('Menu') < 0).map(p => p.slug) || []
   console.log(`[Fixed] 所有文章slug:`, allSlugs.slice(0, 10)) // 只显示前10个
 
-  // 在列表内查找文章 - 支持多种slug格式匹配
+  // 在列表内查找文章 - 仅直接匹配
   props.post = props?.allPages?.find(p => {
-    const match = p.type.indexOf('Menu') < 0 && (
-      p.slug === slug ||                           // 直接匹配 example-1
-      p.slug === `article/${slug}` ||              // 匹配 article/example-1
-      p.slug.endsWith(`/${slug}`) ||               // 匹配任何以 /example-1 结尾的
-      p.id === idToUuid(slug)                      // ID匹配
-    )
+    const match = p.type.indexOf('Menu') < 0 && p.slug === slug
     if (match) {
       console.log(`[Fixed] 找到匹配文章: ${p.slug}, type: ${p.type}`)
     }
     return match
   })
 
-  // 处理非列表内文章
-  if (!props?.post) {
-    console.log(`[Fixed] 在allPages中未找到，尝试直接获取`)
-    const pageId = slug
-    if (pageId.length >= 32) {
-      const post = await getPost(pageId)
-      props.post = post
-    }
-  }
 
   if (!props?.post) {
     console.log(`[Fixed] 最终未找到文章: ${slug}`)
